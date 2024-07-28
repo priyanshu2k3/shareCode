@@ -13,8 +13,22 @@ const config: Config = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      animation: {
+        'spin-slow': 'spin 3s linear infinite',
+        'spin-fast': 'spin 1.5s linear infinite',
+        'pulse': 'pulse 2s infinite',
+        'bounce': 'bounce 1s infinite',
+        'blink': 'blink 1s steps(2, start) infinite',
+      },
+      keyframes: {
+        blink: {
+          '0%, 100%': { visibility: 'hidden' },
+          '50%': { visibility: 'visible' },
+        },
+      },
     },
   },
   plugins: [],
 };
 export default config;
+
