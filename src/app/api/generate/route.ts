@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "redis"
 import { nanoid } from "nanoid";
-import { setData } from "@/app/utils/setData";
+import { setId} from "@/app/utils/setId";
 
 
 export async function GET(request:NextRequest) {
 
     const ip=request.headers?.get("x-forwarded-for")|| "";
-    const link =await setData(ip,"")
-    // const link ="apple"
+    const dbres =await setId(ip,"")
     const host = request.headers.get('host') ||"";
-    console.log("http://"+host+"/"+link)
-    return NextResponse.json({"link":"http://"+host+"/"+link})
+    return NextResponse.json({"link":"http://"+host+"/"+dbres.shortId,"data":dbres.dbData})
 }

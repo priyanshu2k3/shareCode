@@ -6,14 +6,15 @@ import { useRouter} from 'next/navigation';
 
 import { fetcher } from './utils/fetcher';
 import useSWR from 'swr';
+import Whiteboard from './[...]/page';
 
 
 export default function Home() {
   const router =useRouter();
 
-  const { data, error } = useSWR('/api/generate', fetcher)
+  const { data,isLoading, error } = useSWR('/api/generate', fetcher)
     if (error){console.log(error); return (<span><div>Failed to load Our server is down </div></span>)}
-    if (!data)
+    if (isLoading)
   return (
     
     <div className="flex items-center justify-center h-screen bg-gray-900 text-white">
@@ -29,7 +30,8 @@ export default function Home() {
       </div>
     </div>
   );
-  if (data){console.log(data,"db response")
+  else{
+    console.log(data,"db response")
     
     router.push(data.link)
     return(null)

@@ -1,56 +1,61 @@
 "use client"
 // components/Whiteboard.js
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter} from 'next/navigation';
+import { usePathname } from 'next/navigation'
+import axios from 'axios';
 
 const Whiteboard = () => {
 
   const [code, setCode] = useState("");
+  const router = useRouter();
+  const pathname = usePathname()
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
     alert('Code copied to clipboard!');
   };
 
-  const debounce =()=>{
-    let timeout: string | number | NodeJS.Timeout | null | undefined=null
-    return () => {
-        if(timeout) clearTimeout(timeout)
 
-        timeout=setTimeout(() => {
-            
-
-  fetch('/api/', {
-    method: 'POST', 
-    headers: {'Content-Type': 'application/json',},
-    body: JSON.stringify({ key1: code,}),
-  })
-    .then(response => response.json()) 
-    .then(data => {console.log('Success:', data);})
-    .catch(error => {console.error('Error:', error);});
-
-        }, 500)
-    }
-}
+  const debounce = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      console.log("Debounced API call");
+      try {
+        const response = await axios.post('/api/pushData', { "key": pathname.split('/')[1], "data": code }, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        console.log(response);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }, 1000);
+  }, [code, pathname]);
 
   const handleChange = (e:any) => {
+    console.log("Change triggered");
     setCode(e.target.value);
-    debounce()
+    
+    debounce();
   };
 
 
 
   useEffect(() => {
+
+      const last=pathname.split('/')[1]
     const fetchData = async () => {
+
       try {
-        const response = await fetch('/api/pullData');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const result = await response.json();
-        setCode(result);
+        const response = await axios.post('/api/pullData', { key: last });
+        console.log(response)
+        setCode(response.data.rdResponse.rdResponse);
       } catch (error) {
-        console.log(error)
-      } 
+        console.error('Error fetching data:', error);
+      }
     };
 
     fetchData();
